@@ -1,0 +1,37 @@
+name: Reusable Update Manifest
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+      full_image:
+        required: true
+        type: string
+      image_tag:
+        required: true
+        type: string
+
+jobs:
+  update:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Update deployment yaml
+        run: |
+          if [[ "$(uname -s)" == "Darwin" ]]; then
+            sed -i '' -e "s|image:.*|image: ${{ inputs.full_image }}|g" nginx-deployment.yaml
+          else
+            sed -i -e "s|image:.*|image: ${{ inputs.full_image }}|g" nginx-deployment.yaml
+          fi
+
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add nginx-deployment.yaml
+          git commit -m "Updated image to ${{ inputs.image_tag }}" || echo "No changes"
+          git push origin "HEAD:${{ inputs.branch }}"
