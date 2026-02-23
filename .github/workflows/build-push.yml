@@ -1,0 +1,60 @@
+name: Reusable Build and Push
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: true
+        type: string
+      registry:
+        required: true
+        type: string
+      github_user:
+        required: true
+        type: string
+      branch:
+        required: true
+        type: string
+    secrets:
+      ghcr_token:
+        required: true
+    outputs:
+      full_image:
+        description: "Full docker image"
+        value: ${{ jobs.build.outputs.full_image }}
+      image_tag:
+        description: "Image tag"
+        value: ${{ jobs.build.outputs.image_tag }}
+
+jobs:
+  build:
+    runs-on: self-hosted
+    outputs:
+      full_image: ${{ steps.meta.outputs.full_image }}
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Generate image tag
+        id: meta
+        run: |
+          COMMIT=$(git rev-parse --short HEAD)
+          TAG="${{ inputs.branch }}-$COMMIT-${GITHUB_RUN_NUMBER}"
+          FULL_IMAGE="${{ inputs.registry }}/${{ inputs.github_user }}/${{ inputs.image_name }}:$TAG"
+          echo "image_tag=$TAG" >> $GITHUB_OUTPUT
+          echo "full_image=$FULL_IMAGE" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
+        run: |
+          docker build -t "${{ steps.meta.outputs.full_image }}" .
+
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.ghcr_token }}" | docker login ghcr.io -u "${{ inputs.github_user }}" --password-stdin
+
+      - name: Push image
+        run: |
+          docker push "${{ steps.meta.outputs.full_image }}"
