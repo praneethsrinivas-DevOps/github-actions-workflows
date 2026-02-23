@@ -1,0 +1,38 @@
+name: Reusable Kubernetes Deploy
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+      deploy_env:
+        required: true
+        type: string
+      namespace:
+        required: true
+        type: string
+    secrets:
+      kubeconfig_data:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    environment: ${{ inputs.deploy_env }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.kubeconfig_data }}" > ~/.kube/config
+
+      - name: Deploy
+        run: |
+          kubectl apply -f nginx-deployment.yaml -n "${{ inputs.namespace }}"
+          kubectl apply -f nginx-service.yaml -n "${{ inputs.namespace }}"
+          kubectl rollout status deployment/my-nginx-deployment -n "${{ inputs.namespace }}"
