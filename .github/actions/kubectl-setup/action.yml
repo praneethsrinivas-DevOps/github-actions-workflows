@@ -1,0 +1,25 @@
+name: Kubernetes Setup
+description: Install kubectl and configure kubeconfig
+
+inputs:
+  kubeconfig_data:
+    required: true
+    description: Base64 encoded kubeconfig
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v4
+      with:
+        version: latest
+
+    - name: Configure kubeconfig
+      shell: bash
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ inputs.kubeconfig_data }}" | base64 -d > $HOME/.kube/config
+
+    - name: Verify cluster
+      shell: bash
+      run: kubectl get nodes
