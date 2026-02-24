@@ -20,8 +20,10 @@ on:
         required: true
     outputs:
       full_image:
+        description: "Full Docker image"
         value: ${{ jobs.build.outputs.full_image }}
       image_tag:
+        description: "Docker image tag"
         value: ${{ jobs.build.outputs.image_tag }}
 
 jobs:
