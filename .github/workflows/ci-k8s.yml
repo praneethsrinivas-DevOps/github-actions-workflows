@@ -33,7 +33,7 @@ jobs:
 
       - name: Replace image
         run: |
-          sed -i "s|IMAGE_PLACEHOLDER|${{ inputs.full_image }}|g" deployment.yaml
+          sed -i "s|IMAGE_PLACEHOLDER|${{ inputs.full_image }}|g" nginx-deployment.yaml
 
       - name: Deploy
         run: |
