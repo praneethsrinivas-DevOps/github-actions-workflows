@@ -28,7 +28,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       full_image: ${{ steps.meta.outputs.full_image }}
       image_tag: ${{ steps.meta.outputs.image_tag }}
