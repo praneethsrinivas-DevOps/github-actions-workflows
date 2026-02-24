@@ -18,7 +18,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: ${{ inputs.deploy_env }}
 
     steps:
@@ -26,12 +26,12 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
-      - name: Setup kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.kubeconfig_data }}" > ~/.kube/config
+      - name: Setup Kubernetes
+        uses: praneethsrinivas-devops/github-actions-workflows/.github/actions/kubectl-setup@main
+        with:
+          kubeconfig_data: ${{ secrets.kubeconfig_data }}
 
-      - name: Deploy
+      - name: Deploy to cluster
         run: |
           kubectl apply -f nginx-deployment.yaml -n "${{ inputs.namespace }}"
           kubectl apply -f nginx-service.yaml -n "${{ inputs.namespace }}"
