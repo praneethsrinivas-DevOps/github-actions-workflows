@@ -31,6 +31,17 @@ jobs:
       - name: Create namespace
         run: kubectl create namespace ${{ inputs.namespace }}
 
+      # Create GHCR image pull secret
+      - name: Create image pull secret
+        run: |
+          kubectl create secret docker-registry github-pat-secret \
+            --docker-server=ghcr.io \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.ghcr_token }} \
+            --docker-email=devops@example.com \
+            -n ${{ inputs.namespace }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Replace image
         run: |
           sed -i "s|IMAGE_PLACEHOLDER|${{ inputs.full_image }}|g" nginx-deployment.yaml
