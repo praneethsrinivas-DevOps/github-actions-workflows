@@ -38,7 +38,7 @@ jobs:
             --docker-server=ghcr.io \
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.ghcr_token }} \
-            --docker-email=devops@example.com \
+            --docker-email=praneeth.srinivas1993@gmail.com \
             -n ${{ inputs.namespace }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
@@ -53,6 +53,8 @@ jobs:
       - name: Wait for rollout
         run: |
           kubectl rollout status deployment/my-nginx-deployment -n ${{ inputs.namespace }}
+          sleep 30
+          kubectl get pods -n nginx-dev
 
       - name: Show pods
         run: kubectl get pods -n ${{ inputs.namespace }}
