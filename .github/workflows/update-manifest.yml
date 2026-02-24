@@ -15,7 +15,7 @@ on:
 
 jobs:
   update:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -24,11 +24,7 @@ jobs:
 
       - name: Update deployment yaml
         run: |
-          if [[ "$(uname -s)" == "Darwin" ]]; then
-            sed -i '' -e "s|image:.*|image: ${{ inputs.full_image }}|g" nginx-deployment.yaml
-          else
-            sed -i -e "s|image:.*|image: ${{ inputs.full_image }}|g" nginx-deployment.yaml
-          fi
+          sed -i "s|image:.*|image: ${{ inputs.full_image }}|g" nginx-deployment.yaml
 
           git config user.name "github-actions"
           git config user.email "actions@github.com"
